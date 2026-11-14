@@ -33,24 +33,20 @@ export default class Wypst extends Plugin {
 		this._tex2chtml = globalThis.MathJax.tex2chtml;
 
 		globalThis.MathJax.tex2chtml = (e, r) => {
-			if (!hasLatexCommand(e)) {
-				const renderSettings = {
-					displayMode: r.display,
-				}
-				let renderedString = '';
-
-				try {
-					renderedString = wypst.renderToString(e, renderSettings);
-				} catch (error) {
-					if (this.settings.fallbackToLatexOnError) {
-						return this._tex2chtml(e, r);
-					}
-					renderedString = `<span style="color: red;">${error}</span>`;
-				}
-				return parser.parseFromString(renderedString, "text/html").body.firstChild;
-			} else {
-				return this._tex2chtml(e, r);
+			const renderSettings = {
+				displayMode: r.display,
 			}
+			let renderedString = '';
+
+			try {
+				renderedString = wypst.renderToString(e, renderSettings);
+			} catch (error) {
+				if (this.settings.fallbackToLatexOnError) {
+					return this._tex2chtml(e, r);
+				}
+				renderedString = `<span style="color: red;">${error}</span>`;
+			}
+			return parser.parseFromString(renderedString, "text/html").body.firstChild;
 		};
 
 		this.app.workspace.getActiveViewOfType(MarkdownView)?.previewMode.rerender(true);
@@ -95,9 +91,4 @@ export class WypstSettingTab extends PluginSettingTab {
 					})
 			})
 	}
-}
-
-function hasLatexCommand(expr: string) {
-	const regex = /\\\S/;
-	return regex.test(expr);
 }
